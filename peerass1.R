@@ -12,21 +12,20 @@ NumDate <- length(DateTable) #It has 61 days
 
 StepsPerDay <- rep(0, NumDate)
 
-Mydata[which(is.na(Mydata[,1])),1]=0 #set na to 0
-
 for(i in 1:NumDate)
   StepsPerDay[i] = sum(Mydata[(1+NumIntervalPerDay*(i-1)):(NumIntervalPerDay+NumIntervalPerDay*(i-1)),1])
+
+StepsPerDay = StepsPerDay[!is.na(StepsPerDay)]
 
 hist(StepsPerDay, breaks=30, xlab="Steps Per Day", main="Histogram of Steps Per Day", xlim=c(0,25000), ylim=c(0,12))
 mean(StepsPerDay)
 median(StepsPerDay)
 
-
 #What is the average daily activity pattern?
 StepsPerInterval <- rep(0, NumIntervalPerDay)
 
 for(i in 1:NumIntervalPerDay)
-  StepsPerInterval[i] = sum(Mydata[seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay),1])/NumDate
+  StepsPerInterval[i] = mean(Mydata[seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay),1], na.rm=TRUE)
 
 Interval <- Mydata[,3]
 IntervalTable <- table(Interval)
@@ -38,7 +37,6 @@ axis(1, at=seq(1,NumIntervalPerDay,50),labels=IntervalNames[seq(1,NumIntervalPer
 max(StepsPerInterval)  
 #which.max(StepsPerInterval)                #This-th 5 minute interval 
 IntervalNames[which.max(StepsPerInterval)] #This    5 minute interval
-
 
 #Imputing missing values
 Mydata <- OriginalData
@@ -72,16 +70,13 @@ DayorEnd = factor(DayorEnd)
 
 Weekend <- rep(0, NumIntervalPerDay)
 Weekday <- rep(0, NumIntervalPerDay)
-NumDate_end <- length(Seq_end)
-NumDate_day <- NumDate - NumDate_end
 
 for(i in 1:NumIntervalPerDay)
 { DateOneInterval <- seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay)#coresponse to DateNames and DayorEnd.
   
-  Weekend[i] = sum(Mydata[DateOneInterval[Seq_end],1])/NumDate_end
-  Weekday[i] = sum(Mydata[DateOneInterval[-Seq_end],1])/NumDate_day
+  Weekend[i] = mean(Mydata[DateOneInterval[Seq_end],1])
+  Weekday[i] = mean(Mydata[DateOneInterval[-Seq_end],1])
 }
-
 
 df <- data.frame(IntervalNames, Weekend, Weekday)
 library(reshape2)

@@ -7,7 +7,7 @@ output: html_document
 
 # Loading and preprocessing the data
 ```{r, echo=TRUE}
-#setwd("C:/Users/vannem.han/OneDrive/2_Coursera/JHU_Repro_Res/PeerAssess/1")
+setwd("C:/Users/vannem.han/OneDrive/2_Coursera/JHU_Repro_Res/PeerAssess/1")
 OriginalData <- read.csv(file="activity.csv", head=TRUE, sep=",")
 ```
 
@@ -22,24 +22,24 @@ NumDate <- length(DateTable) #It has 61 days
 
 StepsPerDay <- rep(0, NumDate)
 
-Mydata[which(is.na(Mydata[,1])),1]=0 #set na to 0
-
 for(i in 1:NumDate)
   StepsPerDay[i] = sum(Mydata[(1+NumIntervalPerDay*(i-1)):(NumIntervalPerDay+NumIntervalPerDay*(i-1)),1])
+
+StepsPerDay = StepsPerDay[!is.na(StepsPerDay)]
 
 hist(StepsPerDay, breaks=30, xlab="Steps Per Day", main="Histogram of Steps Per Day", xlim=c(0,25000), ylim=c(0,12))
 mean(StepsPerDay)
 median(StepsPerDay)
 ```
 2. The above pic is the histogram of the total number of steps taken each day. 
-3. The mean and median of the otal number of steps taken per day is 9354.23 and 10395.
+3. The mean and median of the otal number of steps taken per day is 10766.19 and 10765.
 
 # What is the average daily activity pattern?
 ```{r, echo=TRUE}
 StepsPerInterval <- rep(0, NumIntervalPerDay)
 
 for(i in 1:NumIntervalPerDay)
-  StepsPerInterval[i] = sum(Mydata[seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay),1])/NumDate
+  StepsPerInterval[i] = mean(Mydata[seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay),1], na.rm=TRUE)
 
 Interval <- Mydata[,3]
 IntervalTable <- table(Interval)
@@ -75,7 +75,7 @@ median(StepsPerDay_fillin)
 ```
 1. 2304 is the total number of missing values in the dataset.
 2. I use the mean for that 5-minute interval for filling in all of the missing values in the dataset.
-4. The mean and median of the NA-filled dataset is 10581.01 and 10395. The mean value is different from the previou one, while the median value is still the same. This is because I use the mean for that 5-minute interval to fill in the NA. When calculating mean value, the denominator doesn't change and the numerator increases. The number of values being equal to median increases, while the value doesn't change which is still the mean. 
+4. The mean and median of the NA-filled dataset is 10766.19 and 10766.19. The mean value is the same from the previou one, while the median value changes. This is because I use the mean for that 5-minute interval to fill in the NA. 
 
 #Are there differences in activity patterns between weekdays and weekends?
 ```{r, echo=TRUE}
@@ -92,14 +92,12 @@ DayorEnd = factor(DayorEnd)
 
 Weekend <- rep(0, NumIntervalPerDay)
 Weekday <- rep(0, NumIntervalPerDay)
-NumDate_end <- length(Seq_end)
-NumDate_day <- NumDate - NumDate_end
 
 for(i in 1:NumIntervalPerDay)
 { DateOneInterval <- seq(from=i, to=i+NumIntervalPerDay*(NumDate-1), by=NumIntervalPerDay)#coresponse to DateNames and DayorEnd.
   
-  Weekend[i] = sum(Mydata[DateOneInterval[Seq_end],1])/NumDate_end
-  Weekday[i] = sum(Mydata[DateOneInterval[-Seq_end],1])/NumDate_day
+  Weekend[i] = mean(Mydata[DateOneInterval[Seq_end],1])
+  Weekday[i] = mean(Mydata[DateOneInterval[-Seq_end],1])
 }
 
 df <- data.frame(IntervalNames, Weekend, Weekday)
